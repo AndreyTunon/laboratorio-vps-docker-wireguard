@@ -16,10 +16,10 @@ La arquitectura esta pensada para 5 grupos de 4 estudiantes.
 
 Arquitectura general
 
-`	ext
+```text
 Estudiante → WireGuard VPN → SSH → ForceCommand → Contenedor Docker
 
-`
+```
 
 ---
 
