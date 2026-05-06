@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Laboratorio VPS - WireGuard + Docker + SSH</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    margin: 0;
+}
+
+header {
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    padding: 30px;
+    text-align: center;
+}
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #38bdf8;
+}
+
+h3 {
+    color: #60a5fa;
+}
+
+pre {
+    background: #020617;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+/* DIAGRAMA */
+.diagram {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.box {
+    background: #020617;
+    padding: 15px 20px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 140px;
+    border: 2px solid #38bdf8;
+}
+
+.arrow {
+    font-size: 24px;
+}
+
+.bad {
+    color: #ef4444;
+}
+
+.good {
+    color: #22c55e;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #94a3b8;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚀 Laboratorio VPS: WireGuard + Docker + SSH</h1>
+    <p>Arquitectura segura para 20 estudiantes en 5 grupos</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h2>🧠 Orden Correcto</h2>
+<pre>
+1. Instalar Docker
+2. Crear usuarios + contenedores + ForceCommand
+3. Instalar WireGuard
+4. Crear clientes VPN
+5. Restringir SSH
+6. Probar
+</pre>
+</div>
+
+<div class="card">
+<h2>⚙️ 1. Preparar VPS</h2>
+<pre>
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y docker.io ufw curl nano
+sudo systemctl enable --now docker
+</pre>
+</div>
+
+<div class="card">
+<h2>👥 2. Usuarios + Docker</h2>
+<pre>
+sudo chmod +x crear_laboratorio.sh
+sudo ./crear_laboratorio.sh
+</pre>
+<p class="good">
+✔ 5 contenedores<br>
+✔ 20 usuarios<br>
+✔ ForceCommand activo
+</p>
+</div>
+
+<div class="card">
+<h2>🔐 3. Instalar WireGuard</h2>
+<pre>
+wget -O wireguard.sh https://get.vpnsetup.net/wg
+sudo bash wireguard.sh
+</pre>
+</div>
+
+<div class="card">
+<h2>🌐 4. Crear clientes VPN</h2>
+<pre>
+sudo bash wireguard.sh → Add a new client
+</pre>
+</div>
+
+<div class="card">
+<h2>🧪 6. Probar conexión</h2>
+<pre>
+ssh estudiante1@10.66.66.1
+</pre>
+</div>
+
+<div class="card">
+<h2>🔁 Flujo Final (Diagrama)</h2>
+
+<div class="diagram">
+    <div class="box">👨‍💻 Estudiante</div>
+    <div class="arrow">➡️</div>
+    <div class="box">🔐 VPN</div>
+    <div class="arrow">➡️</div>
+    <div class="box">🖥️ VPS</div>
+    <div class="arrow">➡️</div>
+    <div class="box">🔑 SSH</div>
+    <div class="arrow">➡️</div>
+    <div class="box">⚙️ ForceCommand</div>
+    <div class="arrow">➡️</div>
+    <div class="box">📦 Docker</div>
+</div>
+
+</div>
+
+<!-- 🔥 NUEVA SECCIÓN EXPLICATIVA -->
+
+<div class="card">
+<h2>🧠 Cómo funciona realmente la arquitectura</h2>
+
+<pre>
+❌ Usuarios → Grupos Linux → Contenedores   (INCORRECTO)
+✔ Usuario → ForceCommand → Script → Contenedor (CORRECTO)
+</pre>
+
+<h3>🔍 Asignación real</h3>
+
+<pre>
+grupo1:
+  estudiante1
+  estudiante2
+  estudiante3
+  estudiante4
+
+grupo2:
+  estudiante5
+  estudiante6
+  estudiante7
+  estudiante8
+</pre>
+
+<h3>📌 Ejemplo real</h3>
+
+<pre>
+/usr/local/bin/entrar-estudiante4
+→ docker exec -it grupo1 bash
+</pre>
+
+<pre>
+Match User estudiante4
+    ForceCommand /usr/local/bin/entrar-estudiante4
+</pre>
+
+<p class="good">
+✔ No entra al sistema<br>
+✔ Entra directo al contenedor
+</p>
+
+</div>
+
+<div class="card">
+<h2>❌ Por qué NO usar grupos Linux</h2>
+
+<h3>1. No controlan Docker</h3>
+<pre>
+usermod -aG grupo1 estudiante1
+</pre>
+
+<p class="bad">
+❌ No decide contenedor<br>
+❌ No restringe comandos<br>
+❌ No controla Docker
+</p>
+
+<h3>2. No controlan SSH</h3>
+
+<pre>
+ssh estudiante1@servidor
+→ /home/estudiante1
+</pre>
+
+<p class="bad">
+❌ Acceso al sistema<br>
+❌ Movimiento libre<br>
+❌ Riesgo de escalación
+</p>
+
+<h3>3. Sin aislamiento</h3>
+
+<p class="bad">
+❌ Todos en el mismo sistema
+</p>
+
+</div>
+
+<div class="card">
+<h2>✔ Por qué este enfoque es mejor</h2>
+
+<h3>Control total</h3>
+
+<pre>
+Usuario → SSH → Contenedor directo
+</pre>
+
+<p class="good">
+✔ Sin acceso al host<br>
+✔ Aislamiento real
+</p>
+
+<h3>Seguridad</h3>
+
+<pre>
+Grupos Linux = 🔴 Baja
+Docker + SSH = 🟢 Alta
+</pre>
+
+<h3>Privilegios</h3>
+
+<pre>
+usermod -aG docker estudiante1
+→ 🔥 casi root
+</pre>
+
+<p class="good">✔ Evitado en este sistema</p>
+
+</div>
+
+<div class="card">
+<h2>🧠 Analogía</h2>
+
+<pre>
+Grupos Linux:
+Mismo edificio sin control
+</pre>
+
+<pre>
+Tu sistema:
+Laboratorios aislados
+</pre>
+
+</div>
+
+<div class="card">
+<h2>🔥 Conclusión</h2>
+
+<pre>
+Docker + ForceCommand = aislamiento real + seguridad
+</pre>
+
+</div>
+
+<!-- 🔥 FIN NUEVA SECCIÓN -->
+
+<div class="card">
+<h2>🛡️ Firewall</h2>
+<pre>
+sudo ufw allow 51820/udp
+sudo ufw allow from 10.66.66.0/24 to any port 22
+sudo ufw deny 22
+sudo ufw enable
+</pre>
+</div>
+
+<div class="card">
+<h2>🔒 Endurecimiento</h2>
+<pre>
+PasswordAuthentication no
+PermitRootLogin no
+</pre>
+</div>
+
+<div class="card">
+<h2>⚠️ Errores Comunes</h2>
+<p class="bad">
+❌ SSH sin VPN<br>
+❌ Bloquear SSH antes de probar<br>
+❌ Grupo docker<br>
+❌ Sin ForceCommand
+</p>
+</div>
+
+<div class="card">
+<h2>🧠 Resumen</h2>
+<pre>
+WireGuard = acceso seguro
+SSH = control
+ForceCommand = aislamiento
+Docker = entorno
+</pre>
+</div>
+
+</div>
+
+<footer>
+Proyecto de laboratorio - VPS seguro multiusuario
+</footer>
+
+</body>
+</html>
